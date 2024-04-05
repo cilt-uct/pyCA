@@ -1,0 +1,17 @@
+[Unit]
+Description=Etilab: Python Capture Agent UI instance
+Documentation=https://github.com/opencast/pyCA
+Wants=network.target
+PartOf=pyca-etilab.service
+After=pyca-etilab.service
+
+[Service]
+Type=simple
+User=pyca
+WorkingDirectory=/opt/pyCA-etilab
+ExecStart=/usr/bin/python3 -m gunicorn.app.wsgiapp --config=etc/gunicorn.conf.py pyca.ui:app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=pyca-etilab.service

@@ -1,0 +1,12 @@
+[Unit]
+Description=PyCA: Etilab
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+WorkingDirectory=/opt/pyCA-etilab
+# Considered unit active after start
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

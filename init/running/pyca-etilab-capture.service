@@ -1,0 +1,20 @@
+[Unit]
+Description=Etilab: Python Capture Agent capture service
+Documentation=https://github.com/opencast/pyCA
+Wants=network.target
+PartOf=pyca-etilab.service
+After=pyca-etilab.service
+
+[Service]
+Type=notify
+NotifyAccess=all
+WatchdogSec=300
+User=pyca
+WorkingDirectory=/opt/pyCA-etilab
+ExecStart=/opt/pyCA-etilab/start.sh capture
+Restart=always
+RestartSec=10
+TimeoutSec=300
+
+[Install]
+WantedBy=pyca-etilab.service

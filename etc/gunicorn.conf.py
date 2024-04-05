@@ -12,7 +12,7 @@ import multiprocessing
 #   bind = "unix:/var/run/pyca/uisocket"
 #
 # Default: "127.0.0.1:8000"
-#bind = "127.0.0.1:8000"
+bind = "0.0.0.0:5000"
 
 # The number of worker processes for handling requests.
 # Default: 1
