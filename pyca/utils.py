@@ -25,13 +25,18 @@ from urllib.parse import quote as urlquote
 logger = logging.getLogger(__name__)
 
 
-def http_request(url, post_data=None):
+def http_request(url, post_data=None, timeout=None):
     '''Make an HTTP request to a given URL with optional parameters.
     '''
     logger.debug('Requesting URL: %s', url)
     buf = bio()
     curl = pycurl.Curl()
     curl.setopt(curl.URL, url.encode('ascii', 'ignore'))
+
+    # Use cookies if configured
+    if config('server', 'cookiefile'):
+        curl.setopt(curl.COOKIEJAR, config('server', 'cookiefile'))
+        curl.setopt(curl.COOKIEFILE, config('server', 'cookiefile'))
 
     # More verbose curl calls in debug mode
     if logger.getEffectiveLevel() == logging.DEBUG:
@@ -53,6 +58,12 @@ def http_request(url, post_data=None):
         curl.setopt(
             curl.MAX_SEND_SPEED_LARGE,
             config('ingest', 'upload_rate'))
+
+    curl.setopt(curl.CONNECTTIMEOUT, config('http', 'connection_timeout'))
+    if timeout is not None:
+        curl.setopt(curl.TIMEOUT, timeout)
+    else:
+        curl.setopt(curl.TIMEOUT, config('http', 'timeout'))
 
     if post_data:
         curl.setopt(curl.HTTPPOST, post_data)
@@ -77,6 +88,12 @@ def get_service(service_type):
     '''Get available service endpoints for a given service type from the
     Opencast ServiceRegistry.
     '''
+    override = config('server', 'service_overrides', service_type)
+    if override:
+        logger.info('Overriding endpoint for %s: %s', service_type, override)
+        return [override]
+
+    # Get available services from Opencast
     endpoint = '/services/available.json?serviceType=' + str(service_type)
     url = config('server', 'url') + endpoint
     response = http_request(url).decode('utf-8')
@@ -144,7 +161,6 @@ def register_ca(status='idle'):
     '''Register this capture agent at the Matterhorn admin server so that it
     shows up in the admin interface.
 
-    :param address: Address of the capture agent web ui
     :param status: Current status of the capture agent
     '''
     # If this is a backup CA we don't tell the Matterhorn core that we are

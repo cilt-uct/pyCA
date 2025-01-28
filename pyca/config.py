@@ -43,11 +43,13 @@ upload_rate      = string(default='0')
 
 [server]
 url              = string(default='https://develop.opencast.org')
-auth_method      = option('basic', 'digest', default='digest')
-username         = string(default='opencast_system_account')
-password         = string(default='CHANGE_ME')
+auth_method      = option('basic', 'digest', default='basic')
+username         = string(default='admin')
+password         = string(default='opencast')
 insecure         = boolean(default=False)
 certificate      = string(default='')
+cookiefile       = string(default='')
+[[service_overrides]]
 
 [ui]
 username         = string(default='admin')
@@ -62,6 +64,10 @@ stderr           = boolean(default=True)
 file             = string(default='')
 level            = option('debug', 'info', 'warning', 'error', default='info')
 format           = string(default='[%(name)s:%(lineno)s:%(funcName)s()] [%(levelname)s] %(message)s')
+
+[http]
+timeout          = integer(min=0, default=300)
+connection_timeout = integer(min=0, default=180)
 
 [services]
 '''  # noqa
@@ -164,6 +170,8 @@ def logger_init():
         handlers.append(logging.StreamHandler(sys.stderr))
     if logconf['file']:
         handlers.append(logging.handlers.WatchedFileHandler(logconf['file']))
+    if logging.root.hasHandlers():
+        logging.root.handlers.clear()
     for handler in handlers:
         handler.setFormatter(logging.Formatter(logconf['format']))
         logging.root.addHandler(handler)
